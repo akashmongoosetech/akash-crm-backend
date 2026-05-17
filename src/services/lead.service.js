@@ -4,6 +4,12 @@ const createLead = async (leadData, userId) => {
   const lead = new Lead({
     ...leadData,
     createdBy: userId,
+    activities: [{
+      user: 'System',
+      action: 'Lead created',
+      time: 'Just now',
+      iconType: 'User'
+    }]
   });
   return await lead.save();
 };
@@ -48,9 +54,24 @@ const getLeadById = async (id) => {
 };
 
 const updateLead = async (id, leadData, userId) => {
+  const lead = await Lead.findOne({ _id: id, isDeleted: false });
+  if (!lead) return null;
+
+  const updates = { ...leadData, updatedBy: userId };
+
+  if (leadData.leadStatus && leadData.leadStatus !== lead.leadStatus) {
+    lead.activities.push({
+      user: 'Sales Rep',
+      action: `changed status to ${leadData.leadStatus}`,
+      time: 'Just now',
+      iconType: 'Clock'
+    });
+    updates.activities = lead.activities;
+  }
+
   return await Lead.findOneAndUpdate(
     { _id: id, isDeleted: false },
-    { ...leadData, updatedBy: userId },
+    updates,
     { new: true, runValidators: true }
   );
 };

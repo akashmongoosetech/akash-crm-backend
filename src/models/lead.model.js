@@ -99,6 +99,12 @@ const leadSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  activities: [{
+    user: { type: String, default: 'System' },
+    action: String,
+    time: String,
+    iconType: { type: String, enum: ['User', 'Clock'], default: 'Clock' }
+  }],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
