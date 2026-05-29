@@ -15,4 +15,7 @@ router.route('/:id')
   .put(authorize('admin', 'manager', 'user'), leadController.updateLead)
   .delete(authorize('admin', 'manager'), leadController.deleteLead);
 
+router.route('/:id/notes')
+  .post(authorize('admin', 'manager', 'user'), leadController.addNote);
+
 module.exports = router;

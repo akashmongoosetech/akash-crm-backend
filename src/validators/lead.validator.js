@@ -21,7 +21,7 @@ const leadSchema = z.object({
   assignedUser: z.string().optional(),
   tags: z.string().optional(),
   description: z.string().optional(),
-  notes: z.string().optional(),
+  notes: z.union([z.string(), z.array(z.any())]).optional(),
 });
 
 const validateLead = (data) => {

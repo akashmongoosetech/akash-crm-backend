@@ -31,6 +31,19 @@ const updateLead = asyncHandler(async (req, res) => {
   return successResponse(res, 'Lead updated successfully', lead);
 });
 
+const addNote = asyncHandler(async (req, res) => {
+  const { text } = req.body;
+  if (!text) {
+    return errorResponse(res, 'Note text is required', 400);
+  }
+  const userName = `${req.user.firstName} ${req.user.lastName}`;
+  const lead = await leadService.addNote(req.params.id, text, userName);
+  if (!lead) {
+    return errorResponse(res, 'Lead not found', 404);
+  }
+  return successResponse(res, 'Note added successfully', lead);
+});
+
 const deleteLead = asyncHandler(async (req, res) => {
   const lead = await leadService.deleteLead(req.params.id);
   if (!lead) {
@@ -44,5 +57,6 @@ module.exports = {
   getLeads,
   getLeadById,
   updateLead,
+  addNote,
   deleteLead,
 };

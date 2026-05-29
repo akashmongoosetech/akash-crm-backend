@@ -1,13 +1,18 @@
 const Lead = require('../models/lead.model');
 
 const createLead = async (leadData, userId) => {
+  const notes = typeof leadData.notes === 'string' 
+    ? (leadData.notes ? [{ text: leadData.notes, user: 'System', createdAt: new Date() }] : [])
+    : (leadData.notes || []);
+
   const lead = new Lead({
     ...leadData,
+    notes,
     createdBy: userId,
     activities: [{
       user: 'System',
       action: 'Lead created',
-      time: 'Just now',
+      time: new Date().toISOString(),
       iconType: 'User'
     }]
   });
@@ -58,22 +63,42 @@ const updateLead = async (id, leadData, userId) => {
   if (!lead) return null;
 
   const updates = { ...leadData, updatedBy: userId };
+  
+  if (typeof leadData.notes === 'string') {
+    updates.notes = leadData.notes ? [{ text: leadData.notes, user: 'System', createdAt: new Date() }] : [];
+  }
 
   if (leadData.leadStatus && leadData.leadStatus !== lead.leadStatus) {
     lead.activities.push({
       user: 'Sales Rep',
       action: `changed status to ${leadData.leadStatus}`,
-      time: 'Just now',
+      time: new Date().toISOString(),
       iconType: 'Clock'
     });
-    updates.activities = lead.activities;
+  } else {
+    lead.activities.push({
+      user: 'Sales Rep',
+      action: 'Lead updated',
+      time: new Date().toISOString(),
+      iconType: 'Clock'
+    });
   }
+  updates.activities = lead.activities;
 
   return await Lead.findOneAndUpdate(
     { _id: id, isDeleted: false },
     updates,
     { new: true, runValidators: true }
   );
+};
+
+const addNote = async (id, text, userName) => {
+  const lead = await Lead.findOne({ _id: id, isDeleted: false });
+  if (!lead) return null;
+
+  const newNote = { text, user: userName, createdAt: new Date() };
+  lead.notes.push(newNote);
+  return await lead.save();
 };
 
 const deleteLead = async (id) => {
@@ -89,5 +114,6 @@ module.exports = {
   getLeads,
   getLeadById,
   updateLead,
+  addNote,
   deleteLead,
 };

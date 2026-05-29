@@ -95,10 +95,11 @@ const leadSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  notes: {
-    type: String,
-    trim: true
-  },
+  notes: [{
+    text: { type: String, required: true },
+    user: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+  }],
   activities: [{
     user: { type: String, default: 'System' },
     action: String,
